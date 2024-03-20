@@ -11,7 +11,7 @@ app.use(express.static("public"));
 app.use(bodyParser.urlencoded({extended: true,}));
 
 mongoose.connect(
-  "mongodb+srv://kartikginwal07:uF8TBPDR6xvzCjls@cluster0.bk1on2o.mongodb.net/khatabook"
+  "<your mongo connection string with `/khatabook` at the end.>"
 );
 var db = mongoose.connection;
 
