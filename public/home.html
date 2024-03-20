@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KhataBook | Welcome Page</title>
+    <link rel="stylesheet" href="home.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+</head>
+
+<body>
+    <div class="nav">
+        KhataBook .
+    </div>
+    <div class="wrapper">
+        <section class="home">
+            <div class="container">
+                <div class="row">
+                    <div class="home-text">
+                        <h1>Welcome to
+                            <span class="magic">
+                                <span class="magic-star">
+                                    <svg viewBox="0 0 512 512">
+                                        <path
+                                            d="M512 255.1c0 11.34-7.406 20.86-18.44 23.64l-171.3 42.78l-42.78 171.1C276.7 504.6 267.2 512 255.9 512s-20.84-7.406-23.62-18.44l-42.66-171.2L18.47 279.6C7.406 276.8 0 267.3 0 255.1c0-11.34 7.406-20.83 18.44-23.61l171.2-42.78l42.78-171.1C235.2 7.406 244.7 0 256 0s20.84 7.406 23.62 18.44l42.78 171.2l171.2 42.78C504.6 235.2 512 244.6 512 255.1z" />
+                                    </svg>
+                                </span>
+                                <span class="magic-star">
+                                    <svg viewBox="0 0 512 512">
+                                        <path
+                                            d="M512 255.1c0 11.34-7.406 20.86-18.44 23.64l-171.3 42.78l-42.78 171.1C276.7 504.6 267.2 512 255.9 512s-20.84-7.406-23.62-18.44l-42.66-171.2L18.47 279.6C7.406 276.8 0 267.3 0 255.1c0-11.34 7.406-20.83 18.44-23.61l171.2-42.78l42.78-171.1C235.2 7.406 244.7 0 256 0s20.84 7.406 23.62 18.44l42.78 171.2l171.2 42.78C504.6 235.2 512 244.6 512 255.1z" />
+                                    </svg>
+                                </span>
+                                <span class="magic-star">
+                                    <svg viewBox="0 0 512 512">
+                                        <path
+                                            d="M512 255.1c0 11.34-7.406 20.86-18.44 23.64l-171.3 42.78l-42.78 171.1C276.7 504.6 267.2 512 255.9 512s-20.84-7.406-23.62-18.44l-42.66-171.2L18.47 279.6C7.406 276.8 0 267.3 0 255.1c0-11.34 7.406-20.83 18.44-23.61l171.2-42.78l42.78-171.1C235.2 7.406 244.7 0 256 0s20.84 7.406 23.62 18.44l42.78 171.2l171.2 42.78C504.6 235.2 512 244.6 512 255.1z" />
+                                    </svg>
+                                </span>
+                                <span class="magic-text">KhataBook </span>
+                            </span>
+
+                        </h1>
+                        <p class="animate-text">
+                            <span>Simplifying your digital experience!</span>
+                            <span>Managinging your journal entries!</span>
+                            <span>Simplifying your expense tracking!</span>
+                            <span>Automating your cyber experience!</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <p>KhataBook is a user-friendly platform designed to streamline your online interactions. With seamless and
+            error free finance management, KhataBook ensures a smooth and secure experience for all users.</p>
+        <div class="bottom">
+            <div class="errorBox" id="errorBox">
+                <span id="errorSpan">User Not found</span>
+            </div>
+            <a href="./createCustomer.html">
+                <button type="submit">Create a New Customer</button> <br>
+            </a>
+            or <br><br>
+            <form action="/searchCustomer" method="POST">
+                <div class="search">
+                    <span class="material-symbols-outlined">search</span>
+                    <input type="search" class="searchInput" name="userName" id="userName"
+                        placeholder="Search Existing User" required>
+                </div>
+                <button type="submit" onclick="save()">Search</button>
+            </form>
+            <a href="./completeLogs.html">
+                <button type="submit">View All Transactions</button> <br>
+            </a>
+        </div>
+    </div>
+    <div class="footer"></div>
+    <script>
+        let indexabc = 0,
+            interval = 1000;
+
+        const rand = (min, max) =>
+            Math.floor(Math.random() * (max - min + 1)) + min;
+
+        const animate = star => {
+            star.style.setProperty("--star-left", `${rand(-10, 100)}%`);
+            star.style.setProperty("--star-top", `${rand(-40, 80)}%`);
+
+            star.style.animation = "none";
+            star.offsetHeight;
+            star.style.animation = "";
+        }
+
+        for (const star of document.getElementsByClassName("magic-star")) {
+            setTimeout(() => {
+                animate(star);
+
+                setInterval(() => animate(star), 1000);
+            }, indexabc++ * (interval / 3))
+        }
+    </script>
+    <script>
+        function save() {
+            const name = document.getElementById('userName').value;
+            localStorage.setItem("khatabookUser", name);
+        }
+        const txts = document.querySelector(".animate-text").children,
+            txtsLen = txts.length;
+        let index = 0;
+        const textInTimer = 3000,
+            textOutTimer = 2800;
+
+        function animateText() {
+            for (let i = 0; i < txtsLen; i++) {
+                txts[i].classList.remove("text-in", "text-out");
+            }
+            txts[index].classList.add("text-in");
+
+            setTimeout(function () {
+                txts[index].classList.add("text-out");
+            }, textOutTimer)
+
+            setTimeout(function () {
+
+                if (index == txtsLen - 1) {
+                    index = 0;
+                }
+                else {
+                    index++;
+                }
+                animateText();
+            }, textInTimer);
+        }
+
+        window.onload = animateText;
+
+    </script>
+</body>
+
+</html>

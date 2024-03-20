@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KhataBook | Expense Tracker</title>
+    <link rel="stylesheet" href="./details.css" />
+</head>
+
+<body>
+    <div class="nav">
+        KhataBook .
+    </div>
+    <h1 id="userName">User Name</h1>
+    <main>
+        <header>
+            <div>
+                <h5>Total Balance</h5>
+                <span id="balance">₹0.00</span>
+            </div>
+            <div>
+                <h5>Money Out</h5>
+                <span id="income">₹0.00</span>
+            </div>
+            <div>
+                <h5>Money In</h5>
+                <span id="expense">₹0.00</span>
+            </div>
+        </header>
+
+        <section>
+            <h3>Transactions</h3>
+            <ul id="transactionList"></ul>
+            <div id="status"></div>
+        </section>
+
+        <section>
+            <h3>Add Transaction</h3>
+            <form id="transactionForm">
+                <div>
+                    <label for="type">
+                        <input type="checkbox" name="type" id="type" />
+                        <div class="option">
+                            <span>Money Out</span>
+                            <span>Money In</span>
+                        </div>
+                    </label>
+                </div>
+                <div>
+                    <label for="name">Note</label>
+                    <input type="text" name="name" required />
+                </div>
+                <div>
+                    <label for="amount">Amount</label>
+                    <input type="number" name="amount" value="0" min="0.01" step="0.01" required />
+                </div>
+                <div>
+                    <label for="date">Date</label>
+                    <input type="date" name="date" required />
+                </div>
+                <button type="submit">Submit</button>
+            </form>
+        </section>
+    </main>
+    <script>
+        allCookies = document.cookie;
+        let name = "khatabookname=";
+        let decodedCookie = decodeURIComponent(document.cookie);
+        let ca = decodedCookie.split(';');
+        let s = "";
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                s = c.substring(name.length, c.length);
+            }
+        }
+        document.getElementById('userName').innerHTML = `${s}`;
+
+
+        // Transactions logic
+
+        const list = document.getElementById("transactionList");
+        const form = document.getElementById("transactionForm");
+        const status = document.getElementById("status");
+        const balance = document.getElementById("balance");
+        const income = document.getElementById("income");
+        const expense = document.getElementById("expense");
+        form.addEventListener("submit", addData);
+
+        const formatter = new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: "INR",
+            signDisplay: "always",
+        });
+
+        function fetchData() {
+            let inc = 0, out = 0, tot = 0;
+            balance.innerHTML = `₹0`;
+            income.innerHTML = `₹0`;
+            expense.innerHTML = `₹0`;
+            fetch('/api/data')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    list.innerHTML = "";
+
+                    status.textContent = "";
+                    if (data.length === 0) {
+                        status.textContent = "No transactions.";
+                        return;
+                    }
+                    data.forEach(({ _id, name, note, amount, date, type }) => {
+                        if (name == s) {
+                            const sign = "Money Out" === type ? 1 : -1;
+                            if (sign == 1) {
+                                inc += amount;
+                            } else {
+                                out += amount;
+                            }
+                            const li = document.createElement("li");
+                            li.innerHTML = `
+      <div class="name">
+        <h4>${note}</h4>
+        <p>${new Date(date).toLocaleDateString()}</p>
+      </div>
+
+      <div class="amount ${type}">
+        <span>${formatter.format(amount * sign)}</span>
+      </div>
+    
+      <div class="action">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" onclick="deleteTransaction('${_id}')">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+    `;
+
+                            list.appendChild(li);
+                        }
+                            let bal = inc - out;
+                            balance.innerHTML = `₹${bal}`;
+                            income.innerHTML = `₹${inc}`;
+                            expense.innerHTML = `₹${out}`;
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        }
+
+        function addData(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const data = {
+                name: s,
+                note: formData.get("name"),
+                amount: parseFloat(formData.get("amount")),
+                date: new Date(formData.get("date")),
+                type: "on" === formData.get("type") ? "Money In" : "Money Out",
+            };
+            this.reset();
+
+            fetch('/api/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    fetchData();
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        }
+
+        function deleteTransaction(id) {
+            fetch(`/api/delete/${id}`, {
+                method: 'DELETE',
+            }).then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+                .then(data => {
+                    fetchData();
+                    console.log('Success:', data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        window.onload = fetchData();
+    </script>
+</body>
+
+</html>
